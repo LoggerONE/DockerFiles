@@ -18,7 +18,6 @@ RUN docker-php-ext-install dom
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install mcrypt
 RUN docker-php-ext-install mysqli
-RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install xmlrpc
 RUN docker-php-ext-install soap
 RUN docker-php-ext-install zip
