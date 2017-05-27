@@ -1,4 +1,4 @@
-# docker build -t snowsprout/php7.1-fpm .
+# docker build -t snowsprout/php7.1-fpm:laravel .
 
 FROM php:7.1-fpm
 
