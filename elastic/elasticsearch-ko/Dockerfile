@@ -1,21 +1,13 @@
-# docker build -t snowsprout/elasticsearch-eunjeon .
-# Basically installed ElasticSearch
+# docker build -t snowsprout/elasticsearch .
 
-
-FROM elasticsearch:5.4
+FROM elasticsearch
 
 MAINTAINER "SnowSprout" <me@snowsprout.net>
 
-RUN \
-  sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
-  apt-get update && \
-  apt-get -y upgrade && \
-  apt-get install -y build-essential && \
-  apt-get install -y software-properties-common && \
-  apt-get install -y byobu curl git htop man unzip vim wget && \
-  rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install zip
 
-#Install mecab-ko
+#install mecab-ko
 RUN \
   cd /opt &&\
   wget https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz &&\
@@ -27,44 +19,31 @@ RUN \
   make install &&\
   ldconfig
 
-#Install mecab-ko-dic
+#install mecab-ko-dic
 RUN \
   cd /opt &&\
-  wget https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-1.6.1-20140814.tar.gz &&\
-  tar xvf mecab-ko-dic-1.6.1-20140814.tar.gz &&\
-  cd /opt/mecab-ko-dic-1.6.1-20140814 &&\
+  wget https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-2.0.1-20150920.tar.gz &&\
+  tar xvf mecab-ko-dic-2.0.1-20150920.tar.gz &&\
+  cd /opt/mecab-ko-dic-2.0.1-20150920.tar.gz &&\
   ./autogen.sh &&\
   ./configure &&\
   make &&\
   make install
 
-ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF8
-
+#install mocab-java
 RUN \
   cd /opt &&\
-  wget https://mecab.googlecode.com/files/mecab-java-0.996.tar.gz &&\
+  wget https://bitbucket.org/eunjeon/mecab-java/downloads/mecab-java-0.996.tar.gz &&\
   tar xvf mecab-java-0.996.tar.gz &&\
   cd /opt/mecab-java-0.996 &&\
   sed -i 's|/usr/lib/jvm/java-6-openjdk/include|/usr/lib/jvm/java-8-oracle/include|' Makefile &&\
   make &&\
   cp libMeCab.so /usr/local/lib
 
-# Define mountable directories.
-VOLUME ["/data"]
+ENV JAVA_TOOL_OPTIONS -Dfile.encoding=UTF8
 
-# Mount elasticsearch.yml config
-ADD config/elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 
-RUN /elasticsearch/bin/plugin --install analysis-mecab-ko-0.17.0 --url https://bitbucket.org/eunjeon/mecab-ko-lucene-analyzer/downloads/elasticsearch-analysis-mecab-ko-0.17.0.zip
-
-# Define working directory.
-WORKDIR /data
-
-# Define default command.
-CMD /elasticsearch/bin/elasticsearch -Djava.library.path=/usr/local/lib
-
-# Expose ports.
-#   - 9200: HTTP
-#   - 9300: transport
-EXPOSE 9200
-EXPOSE 9300
+RUN \
+	cd /usr/share/elasticsearch &&\
+	bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.5.0 -p 2.4.0.1 &&\
+	./bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-2.4.0.1.zip &&\
