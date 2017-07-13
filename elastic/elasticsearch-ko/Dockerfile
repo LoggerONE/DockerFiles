@@ -1,13 +1,13 @@
 # docker build -t snowsprout/elasticsearch-ko .
 
-FROM elasticsearch:5.5.0
+FROM elasticsearch:5.4.3
 
 MAINTAINER "SnowSprout" <me@snowsprout.net>
 
 RUN \
 	apt-get update &&\
 	apt-get install -y build-essential &&\
-	apt-get install -y zip automake openjdk-8-jdk
+	apt-get install -y zip automake openjdk-8-jdk g++
 
 #install mecab-ko
 RUN \
@@ -43,14 +43,15 @@ RUN \
   make &&\
   cp libMeCab.so /usr/local/lib
 
-ENV ES_JAVA_OPTS "-Dfile.encoding=UTF8 -Djava.library.path=/usr/local/lib -Des.security.manager.enabled=false"
-#ENV ES_JAVA_OPTS "$ES_JAVA_OPTS "
+ENV ES_JAVA_OPTS "$ES_JAVA_OPTS -Dfile.encoding=UTF8 -Djava.library.path=/usr/local/lib -Des.security.manager.enabled=false"
 
-RUN cd /usr/share/elasticsearch
-RUN ["/bin/bash", "-c", "bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.5.0 -p 2.4.0.1"]
+#RUN cd /usr/share/elasticsearch
+#RUN ["/bin/bash", "-c", "bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.5.0 -p 5.1.1.1"]
 #RUN cd /usr/share/elasticsearch &&\
-#	./bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-2.4.0.1.zip
+#	./bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-5.1.1.1.zip
 
+RUN cd /usr/share/elasticsearch &&\
+	./bin/elasticsearch-plugin install https://bitbucket.org/eunjeon/mecab-ko-lucene-analyzer/issues/attachments/8/eunjeon/mecab-ko-lucene-analyzer/1499320038.43/8/elasticsearch-analysis-mecab-ko-5.4.3.0.zip
 
 
 # Expose ports.
