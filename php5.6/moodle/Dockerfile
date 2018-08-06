@@ -13,10 +13,16 @@ RUN apt-get update && apt-get install -y \
 			libxml2-dev \
 			libssl-dev \
 			libpng-dev
-			
+
+RUN apt-get update \
+    && apt-get install libpng12-dev libfreetype6-dev libjpeg62-turbo-dev -qy \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install gd			
 
 # Install Exts
-RUN docker-php-ext-install gd
 RUN docker-php-ext-install dom
 RUN docker-php-ext-install mbstring
 RUN docker-php-ext-install mcrypt
@@ -28,3 +34,5 @@ RUN docker-php-ext-install iconv
 RUN docker-php-ext-install opcache
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install intl
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install bcmath
